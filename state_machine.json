@@ -1,0 +1,37 @@
+{
+  "Comment": "Capstone image resize workflow: Task -> Choice -> Success/Fail",
+  "StartAt": "ResizeImage",
+  "States": {
+    "ResizeImage": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-2:585768175952:function:capstone-image-resize",
+        "Payload.$": "$"
+      },
+      "ResultSelector": {
+        "lambdaResult.$": "$.Payload"
+      },
+      "ResultPath": "$.task",
+      "Next": "WasOk"
+    },
+    "WasOk": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.task.lambdaResult.ok",
+          "BooleanEquals": true,
+          "Next": "Success"
+        }
+      ],
+      "Default": "Fail"
+    },
+    "Success": {
+      "Type": "Succeed"
+    },
+    "Fail": {
+      "Type": "Fail",
+      "Cause": "Resize failed or returned ok=false"
+    }
+  }
+}
