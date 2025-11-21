@@ -12,10 +12,22 @@ A Step Functions state machine runs the Lambda and branches Success/Fail.
 - Name: `capstone-image-resize`
 - Runtime: Python 3.9 (x86_64)
 - Env: `ORIGINALS_BUCKET`, `THUMBNAILS_BUCKET`, `THUMB_MAX_WIDTH=512`, `THUMB_MAX_HEIGHT=512`
+- Dependencies: `Pillow` (via `requirements.txt`)
+- Handler: `lambda_function.lambda_handler`
 
 ## Step Functions
 - Name: `capstone-image-resize-sm`
 - Definition: see `state_machine.json`
+- Flow: `ResizeImage (Lambda Task)` → `WasOk? (Choice)` → `Success | Fail`
+
+## API Gateway
+- REST API with resource `/start` (POST)
+- **AWS Service** integration to **Step Functions** `StartExecution`
+- Execution role for API Gateway is allowed:  
+  `states:StartExecution` on the state machine ARN
+- Mapping template (application/json) passes the incoming body to SFN as input
+
+---
 
 ## How to test (manual)
 1. Upload `test.jpg` to `capstone-images-originals-aryanpatel`.
